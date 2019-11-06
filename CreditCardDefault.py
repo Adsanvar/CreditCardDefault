@@ -9,6 +9,7 @@ from sklearn.linear_model import Perceptron
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import export_graphviz
 import pydot
+import math
 
 data = pd.read_excel('default_of_credit_card_clients.xls', header=None)
 
@@ -24,19 +25,22 @@ data.drop(data.columns[0], 1, inplace=True)
 # for i, row in data.iterrows():
 #     print(row['X12'])
 
-
 data = np.array(data)
 
+selector = math.ceil((1/4)*data.shape[0])
+end = data.shape[0] - selector
+print(selector)
 
-test_data_features = [i for i in data[25001:, :-1]]
-test_data_features_class = [i for i in data[25001:, 23]]
-train_data_features = [i for i in data[:25001, :-1]] # content only, no result values
-train_data_class = [i for i in data[:25001, 23]]
-print(train_data_features)
+test_data_features = [i for i in data[end:, :-1]]
+test_data_features_class = [i for i in data[end:, 23]]
+train_data_features = [i for i in data[:end, :-1]] # content only, no result values
+train_data_class = [i for i in data[:end, 23]]
+
+
+#print(train_data_features)
 #Normalized Data
 norm_test = StandardScaler().fit_transform(test_data_features)
 norm_train = StandardScaler().fit_transform(train_data_features)
-
 
 
 #=======================
@@ -274,13 +278,6 @@ print("Random Forest 2: ")
 
 #________________________
 
-data_features = [i for i in data[1:29000, 1:-1]]
-data_class = [i for i in data[1:29000, 23]]
-test_feat = [i for i in data[29001:, 1:-1]]
-test_class =[i for i in data[29001:, 23]]
-
-norm_data_features = StandardScaler().fit_transform(data_features)
-norm_test = StandardScaler().fit_transform(test_feat)
 
 # #covaraince
 # c = np.cov(norm_data_features.T)
@@ -296,12 +293,31 @@ rfc.fit(train_data_features , train_data_class)
 print("Normal: " + str(rfc.score(test_data_features, test_data_features_class)))
 
 rfc2 = RandomForestClassifier(n_estimators=100)
-rfc2.fit(norm_data_features , data_class)
+rfc2.fit(norm_train , train_data_class)
 
-print("Standardized: " + str(rfc2.score(norm_test, test_class)))
+print("Standardized: " + str(rfc2.score(norm_test, test_data_features_class)))
 
 # rfc.fit(comp_test , test_data_features_class)
 
 # print("PCA: " + str(rfc.score(comp_test, test_data_features_class)))
+
+#=======================
+
+#=======================
+
+from sklearn.neural_network import MLPClassifier
+
+nn = MLPClassifier()
+
+nn.fit(train_data_features, train_data_class)
+
+print(nn.score(test_data_features, test_data_features_class))
+# print("Normalized")
+# nn.fit(norm_data_features, data_class)
+
+# print(nn.score(norm_test, test_class))
+
+
+
 
 #=======================
