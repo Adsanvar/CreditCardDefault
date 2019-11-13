@@ -59,6 +59,44 @@ n_default = data[data['default payment next month'] == 0]
 #         f.close()
 
 
+##For Report
+# zeros = data[(data.BILL_AMT1 == 0) & (data.BILL_AMT2 == 0) & (data.BILL_AMT3 == 0) & (data.BILL_AMT4 == 0) & (data.BILL_AMT5 == 0) & (data.BILL_AMT6 == 0) & (data.PAY_AMT1 == 0) & (data.PAY_AMT2 == 0) & (data.PAY_AMT3 == 0) & (data.PAY_AMT4 == 0) & (data.PAY_AMT5 == 0) & (data.PAY_AMT6 == 0) ]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title="Data of Pay -2 and 0's for BILL_AMT / PAY_AMT")
+# ax.bar(0, len(zeros[zeros['default payment next month'] == 1]), align ='center', alpha=.4, label ="Default: " + str(len(zeros[zeros['default payment next month'] == 1])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 1])/len(default)) )
+# ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
+# plt.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('unrepresentative.png', format='png')
+#plt.show()
+
+##This drops the data
+zeros = data[(data.BILL_AMT1 == 0) & (data.BILL_AMT2 == 0) & (data.BILL_AMT3 == 0) & (data.BILL_AMT4 == 0) & (data.BILL_AMT5 == 0) & (data.BILL_AMT6 == 0) & (data.PAY_AMT1 == 0) & (data.PAY_AMT2 == 0) & (data.PAY_AMT3 == 0) & (data.PAY_AMT4 == 0) & (data.PAY_AMT5 == 0) & (data.PAY_AMT6 == 0) ].index
+data.drop(zeros, inplace = True)
+#data.to_csv("filtered.csv")
+
+
+##Dropping 5,6,0  for Education
+##For report 
+d = data.EDUCATION.value_counts()
+objects = d.index.tolist()
+y_pos = [0, 1, 2, 3, 4, 5, 6]
+fig = plt.figure()
+ax = fig.add_subplot()
+ax.set(title="Data of Pay -2 and 0's for BILL_AMT / PAY_AMT")
+ax.bar(y_pos, len(zeros[zeros['default payment next month'] == 1]), align ='center', alpha=.4, label ="Default: " + str(len(zeros[zeros['default payment next month'] == 1])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 1])/len(default)) )
+#ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
+plt.legend()
+plt.xticks(y_pos, objects)
+plt.show()
+
+
+edu = data[(data.EDUCATION == 5) & (data.EDUCATION == 6) & (data.EDUCATION == 0)].index
+data.drop(edu)
+
 #=============END Data Filtering===============#
 
 
