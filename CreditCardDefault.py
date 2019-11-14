@@ -258,11 +258,25 @@ data.drop(outliers, inplace=True)
 selector = math.ceil((1/4)*data.shape[0]) #percentage of data to be obtained
 end = data.shape[0] - selector #the point at which it is
 print(end)
-test_data_features = data.loc[end]
+test_data_features = data.loc[end:, :]
+
+# final_default = test_data_features[test_data_features['default payment next month'] == 1] #ON filtered
+# final_n_default = test_data_features[test_data_features['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set(title='TEST DATA')
+# ax.bar(0, len(final_default), align ='center', alpha=.4, label ="Default: " + str(len(final_default)) )
+# ax.bar(1, len(final_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(final_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('TEST_DATA.png', format='png')
+#plt.show()
 # test_data_features_class = [i for i in data[end:, 23]]
 # train_data_features = [i for i in data[:end, :-1]] # content only, no result values
 # train_data_class = [i for i in data[:end, 23]]
-print(test_data_features)
+
 #=============END SELECTING TEST VS TRAIN DATA===========#
 
 
