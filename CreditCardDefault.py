@@ -11,6 +11,7 @@ from sklearn.tree import export_graphviz
 #import pydot
 import math
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
 data = pd.read_excel('default_of_credit_card_clients.xls', header= None)
 
@@ -59,7 +60,7 @@ n_default = data[data['default payment next month'] == 0]
 #         f.close()
 
 
-##For Report
+##Unrepresenative data 0's all across the board For Report
 # zeros = data[(data.BILL_AMT1 == 0) & (data.BILL_AMT2 == 0) & (data.BILL_AMT3 == 0) & (data.BILL_AMT4 == 0) & (data.BILL_AMT5 == 0) & (data.BILL_AMT6 == 0) & (data.PAY_AMT1 == 0) & (data.PAY_AMT2 == 0) & (data.PAY_AMT3 == 0) & (data.PAY_AMT4 == 0) & (data.PAY_AMT5 == 0) & (data.PAY_AMT6 == 0) ]
 # objects = ('default', 'non_default')
 # y_pos = [0, 1]
@@ -70,7 +71,7 @@ n_default = data[data['default payment next month'] == 0]
 # ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
 # plt.legend()
 # plt.xticks(y_pos, objects)
-# fig.savefig('unrepresentative.png', format='png')
+# fig.savefig('all_zeros.png', format='png')
 #plt.show()
 
 ##This drops the data
@@ -78,42 +79,195 @@ zeros = data[(data.BILL_AMT1 == 0) & (data.BILL_AMT2 == 0) & (data.BILL_AMT3 == 
 data.drop(zeros, inplace = True)
 #data.to_csv("filtered.csv")
 
-
 ##Dropping 5,6,0  for Education
 ##For report 
-d = data.EDUCATION.value_counts()
-objects = d.index.tolist()
-y_pos = [0, 1, 2, 3, 4, 5, 6]
-fig = plt.figure()
-ax = fig.add_subplot()
-ax.set(title="Data of Pay -2 and 0's for BILL_AMT / PAY_AMT")
-ax.bar(y_pos, len(zeros[zeros['default payment next month'] == 1]), align ='center', alpha=.4, label ="Default: " + str(len(zeros[zeros['default payment next month'] == 1])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 1])/len(default)) )
-#ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
-plt.legend()
-plt.xticks(y_pos, objects)
-plt.show()
+# d = data.EDUCATION.value_counts()
+# d2 = d.tolist()
+# objects = d.index.tolist()
+# y_pos = [0, 1, 2, 3, 4, 5, 6]
+# colors = ['g','b','y','purple','pink','gray']
+# label = str(objects[0])+": "+str(d2[0]) +"\n"+ str(objects[1])+": "+str(d2[1]) +"\n"+str(objects[2])+": "+str(d2[2]) +"\n"+str(objects[3])+": "+str(d2[3]) +"\n"+str(objects[4])+": "+str(d2[4]) +"\n"+str(objects[5])+": "+str(d2[5]) +"\n"+str(objects[6])+": "+str(d2[6])
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set(title="Data of Education", xlabel = 'Education Category', ylabel='Number of People')
+# ax.bar(y_pos, d2, align ='center', color =colors, label = label)
+# #ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
+# plt.legend()
+# plt.xticks(y_pos, objects)
+#fig.savefig('education.png', format='png')
+#plt.show()
+
+edu = data[(data.EDUCATION == 5) | (data.EDUCATION == 6) | (data.EDUCATION == 0)].index
+data.drop(edu, inplace = True)
+# d = data.EDUCATION.value_counts()
+# d2 = d.tolist()
+# objects = d.index.tolist()
+# y_pos = [0, 1, 2, 3]
+# colors = ['g','b','y','purple']
+# label = str(objects[0])+": "+str(d2[0]) +"\n"+ str(objects[1])+": "+str(d2[1]) +"\n"+str(objects[2])+": "+str(d2[2]) +"\n"+str(objects[3])+": "+str(d2[3])
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set(title="Data of Education", xlabel = 'Education Category', ylabel='Number of People')
+# ax.bar(y_pos, d2, align ='center', color =colors, label = label)
+# #ax.bar(1, len(zeros[zeros['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(zeros[zeros['default payment next month'] == 0])) +"\nRatio: " +str(len(zeros[zeros['default payment next month'] == 0])/len(n_default)) )
+# plt.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('education_2.png', format='png')
+
+##Dropping Marriage category 0
+
+mrg = data[(data.MARRIAGE == 0)].index
+data.drop(mrg, inplace = True)
+
+# d = data.MARRIAGE.value_counts()
+# d2 = d.tolist()
+# objects = d.index.tolist()
+# y_pos = [0, 1, 2]
+# colors = ['g','b','y']
+# label = str(objects[0])+": "+str(d2[0]) +"\n"+ str(objects[1])+": "+str(d2[1]) +"\n"+str(objects[2])+": "+str(d2[2])
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set(title="Data of Marriage", xlabel = 'Marriage Category', ylabel='Number of People')
+# ax.bar(y_pos, d2, align ='center', color =colors, label = label)
+# plt.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('marriage_2.png', format='png')
 
 
-edu = data[(data.EDUCATION == 5) & (data.EDUCATION == 6) & (data.EDUCATION == 0)].index
-data.drop(edu)
+##Dropping AGE under 18
+age = data[(data.AGE < 18)].index
+data.drop(age, inplace =True)
+
+##Data Imbalanced Pt. 2 Filtered Data
+# f_default = data[data['default payment next month'] == 1] #ON filtered
+# f_n_default = data[data['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Filtered Imbalanced')
+# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('filtered_imbalanced_data.png', format='png')
+#plt.show()
+
+##Histogram of Age Vs Limit Balance
+#objects = data.AGE.tolist() #'names of each bar on x-axis
+#y_pos = [0, 1, 2]
+# label = str(objects[0])+": "+str(d2[0]) +"\n"+ str(objects[1])+": "+str(d2[1]) +"\n"+str(objects[2])+": "+str(d2[2])
+#fig = plt.figure()
+#ax = fig.add_subplot(111)
+#ax.set(title="AGE VS LIMIT_BAL", xlabel = 'AGE', ylabel='LIMIT_BAL')
+#ax.bar(objects, data.LIMIT_BAL.tolist(), align ='center')
+# plt.legend()
+#plt.xticks(y_pos, objects)
+#fig.savefig('skewed_right_filtered_Data.png', format='png')
+#plt.show()
+
+##Normal Curve - pre dropping outliers
+# mean = np.mean(objects)
+# median = np.median(objects)
+# var = np.var(objects)
+# sd = math.sqrt(var)
+# ub = np.max(objects)
+# lb = np.min(objects)
+# q1 = np.quantile(objects, .25)
+# q3 = np.quantile(objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# x = np.arange(lb,ub,1) #used for 'normal'
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd)) #used for 'normal' Curve
+# y = norm.pdf(x,mean,sd) #used for 'normal'
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(data[(data.AGE >60)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(data[(data.AGE) < lower_outliers])))
+# ax.set_title('Skewed Normal Gaussian Curve')
+# plt.legend()
+# fig.savefig('Skewed_Normal_Gaussian_Cruve.png', format='png')
+# #plt.show()
+
+##Removing Outliers
+outliers = data[(data.AGE >60)].index
+data.drop(outliers, inplace=True)
+
+#new_objects = data.AGE.tolist() #'names of each bar on x-axis
+# #y_pos = [0, 1, 2]
+# # label = str(objects[0])+": "+str(d2[0]) +"\n"+ str(objects[1])+": "+str(d2[1]) +"\n"+str(objects[2])+": "+str(d2[2])
+# ax.set(title="AGE VS LIMIT_BAL", xlabel = 'AGE', ylabel='LIMIT_BAL')
+# ax.bar(new_objects, data.LIMIT_BAL.tolist(), align ='center')
+
+# #plt.legend()
+# fig.savefig('no_outliers_filtered_Data.png', format='png')
+# #plt.show()
+
+##Normal Curve With no outliers
+# mean = np.mean(new_objects)
+# median = np.median(new_objects)
+# var = np.var(new_objects)
+# sd = math.sqrt(var)
+# ub = np.max(new_objects)
+# lb = np.min(new_objects)
+# q1 = np.quantile(new_objects, .25)
+# q3 = np.quantile(new_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd)) 
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) )
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) )
+# ax.set_title('Normal Gaussian Curve')
+# plt.legend()
+# fig.savefig('No_Outliers_Skewed_Normal_Gaussian_Cruve.png', format='png')
+# #plt.show()
+
+##Resulting Unbalanced
+# final_default = data[data['default payment next month'] == 1] #ON filtered
+# final_n_default = data[data['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.set(title='Filtered Imbalanced')
+# ax.bar(0, len(final_default), align ='center', alpha=.4, label ="Default: " + str(len(final_default)) )
+# ax.bar(1, len(final_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(final_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('final_imbalanced_data.png', format='png')
+#plt.show()
 
 #=============END Data Filtering===============#
+
+#=============SELECTING TEST VS TRAIN DATA===========#
+
+selector = math.ceil((1/4)*data.shape[0]) #percentage of data to be obtained
+end = data.shape[0] - selector #the point at which it is
+print(end)
+test_data_features = data.loc[end]
+# test_data_features_class = [i for i in data[end:, 23]]
+# train_data_features = [i for i in data[:end, :-1]] # content only, no result values
+# train_data_class = [i for i in data[:end, 23]]
+print(test_data_features)
+#=============END SELECTING TEST VS TRAIN DATA===========#
 
 
 # plt.scatter(n_default.X5, n_default.X1, color = 'g', alpha=.2, label ="non default")
 # plt.scatter(default.X5, default.X1, color ='b', alpha=.3, label="default")
-
-
-# data = np.array(data)
-
-# selector = math.ceil((1/4)*data.shape[0])
-# end = data.shape[0] - selector
-# print(selector)
-
-# test_data_features = [i for i in data[end:, :-1]]
-# test_data_features_class = [i for i in data[end:, 23]]
-# train_data_features = [i for i in data[:end, :-1]] # content only, no result values
-# train_data_class = [i for i in data[:end, 23]]
 
 
 # #print(train_data_features)

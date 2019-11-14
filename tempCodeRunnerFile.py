@@ -1,2 +1,6 @@
-data.drop(zeros, inplace = True)
-data.to_csv("filtered.csv")
+xq3 = np.arange(q3, up,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(0, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1))
