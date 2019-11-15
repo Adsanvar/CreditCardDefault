@@ -255,22 +255,23 @@ data.drop(age, inplace =True)
 
 #=============END Data Filtering===============#
 
-#============DATA ANALYSING==================#
+#============DATA SELECTION - DATA ANALYSING==================#
 
 selector = math.ceil((1/6)*data.shape[0]) #percentage of data to be obtained
 end = data.shape[0] - selector #the point at which it is
 
-test_data = data.loc[end+1:, :]
-test_data_class = data.loc[end+1:, 'default payment next month']
-
+#test_data = data.loc[end+1:, :]
 train_data = data.loc[:end, :]
-train_data_class = data.loc[:end, 'default payment next month']
 
 default = train_data[train_data['default payment next month'] == 1]
 n_default = train_data[train_data['default payment next month'] == 0]
 
 train_data_features = data.loc[:end, :'default payment next month']
-test_data_features = data.loc[end:, :'default payment next month']
+train_data_class = data.loc[:end, 'default payment next month']
+
+test_data_features = data.loc[end+1:, :'default payment next month']
+test_data_class = data.loc[end+1:, 'default payment next month']
+
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -489,34 +490,95 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # fig.savefig('scatter_outliers.png', format='png')
 # #plt.show()
 
+##====================STANDARDIZED
+#selecting only from train dataset
+selection = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis = 1)
 
-#============DATA ANALYSING==================#
+selection_default =selection[selection['default payment next month'] == 1]
+selection_default_class = selection_default.loc[:, 'default payment next month']
+selection_default.drop('default payment next month', axis = 1,inplace = True)
 
-#=============SELECTING TEST VS TRAIN DATA===========#
+selection_n_default =selection[selection['default payment next month'] == 0]
+selection_n_default_class = selection_n_default.loc[:, 'default payment next month']
+selection_n_default.drop('default payment next month', axis = 1,inplace = True)
 
-# selector = math.ceil((1/4)*data.shape[0]) #percentage of data to be obtained
-# end = data.shape[0] - selector #the point at which it is
-# print(end)
-# test_data_features = data.loc[end:, :]
+stand_default = StandardScaler().fit_transform(selection_default)
+stand_n_default = StandardScaler().fit_transform(selection_n_default)
 
-# final_default = test_data_features[test_data_features['default payment next month'] == 1] #ON filtered
-# final_n_default = test_data_features[test_data_features['default payment next month'] == 0]
-# objects = ('default', 'non_default')
-# y_pos = [0, 1]
-# fig = plt.figure()
+stand_def_objects = stand_default.tolist()
+stand_n_def_objects = stand_n_default.tolist()
+
+##standardize def_objects Values
+# mean = np.mean(stand_def_objects)
+# median = np.median(stand_def_objects)
+# var = np.var(stand_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_def_objects)
+# lb = np.min(stand_def_objects)
+# q1 = np.quantile(stand_def_objects, .25)
+# q3 = np.quantile(stand_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# ax.set(title="STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default >upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default < lower_outliers)])))
+# plt.legend()
+# plt.show()
+#fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+
+##standardize n_def_objects Values
 # ax = fig.add_subplot(111)
-# ax.set(title='TEST DATA')
-# ax.bar(0, len(final_default), align ='center', alpha=.4, label ="Default: " + str(len(final_default)) )
-# ax.bar(1, len(final_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(final_n_default)))
-# fig.legend()
-# plt.xticks(y_pos, objects)
-# fig.savefig('TEST_DATA.png', format='png')
-#plt.show()
-# test_data_features_class = [i for i in data[end:, 23]]
-# train_data_features = [i for i in data[:end, :-1]] # content only, no result values
-# train_data_class = [i for i in data[:end, 23]]
+# mean = np.mean(stand_n_def_objects)
+# median = np.median(stand_n_def_objects)
+# var = np.var(stand_n_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_n_def_objects)
+# lb = np.min(stand_n_def_objects)
+# q1 = np.quantile(stand_n_def_objects, .25)
+# q3 = np.quantile(stand_n_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
 
-#=============END SELECTING TEST VS TRAIN DATA===========#
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# ax.set(title="STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default < lower_outliers)])))
+# plt.legend()
+# plt.show()
+
+ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
+from mpl_toolkits import mplot3d
+ax = plt.axes(projection = '3d')
+ax.scatter(stand_default[:, 0], stand_default[:, 2], stand_default[:, 1], label ='Default')
+ax.scatter(stand_n_default[:, 0], stand_n_default[:, 2], stand_n_default[:, 1],  label='Non_Default')
+ax.set(title='Standardized Data', xlabel='LIMIT_BAL', zlabel='AGE', ylabel='EDUCATION')
+plt.legend()
+#Default
+# ax.scatter(default.AGE, default.LIMIT_BAL)
+# ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
+#fig.savefig('scatter_outliers.png', format='png')
+plt.show()
+
+
+#============END DATA SELCETION - DATA ANALYSING==================#
 
 
 # plt.scatter(n_default.X5, n_default.X1, color = 'g', alpha=.2, label ="non default")
