@@ -255,26 +255,22 @@ data.drop(age, inplace =True)
 
 #=============END Data Filtering===============#
 
-#============DATA SELECTION - DATA ANALYSING==================#
+#============DATA SELECTION - DATA ANALYZING==================#
 
 selector = math.ceil((1/6)*data.shape[0]) #percentage of data to be obtained
 end = data.shape[0] - selector #the point at which it is
 
-#test_data = data.loc[end+1:, :]
-train_data = data.loc[:end, :]
-
-default = train_data[train_data['default payment next month'] == 1]
-n_default = train_data[train_data['default payment next month'] == 0]
-
-train_data_features = data.loc[:end, :'default payment next month']
-train_data_class = data.loc[:end, 'default payment next month']
-
+test_data = data.loc[end+1:, :]
 test_data_features = data.loc[end+1:, :'default payment next month']
 test_data_class = data.loc[end+1:, 'default payment next month']
 
+train_data = data.loc[:end, :]
+train_data = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis = 1)
+default = train_data[train_data['default payment next month'] == 1]
+n_default = train_data[train_data['default payment next month'] == 0]
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
 def_objects = default.AGE.tolist()
 n_def_objects = n_default.AGE.tolist()
 l_def_objects = default.LIMIT_BAL.tolist()
@@ -296,7 +292,8 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = default[(default.AGE > upper_outliers)].index
-default.drop(outliers, inplace = True)
+train_data.drop(outliers, inplace = True)
+
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -325,7 +322,7 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = n_default[(n_default.AGE > upper_outliers)].index
-n_default.drop(outliers, inplace = True)
+train_data.drop(outliers, inplace = True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -358,7 +355,11 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = n_default[(n_default.LIMIT_BAL > upper_outliers)].index
-n_default.drop(outliers, inplace = True)
+for i in outliers:
+    if i in train_data.index:
+        train_data.drop(i, inplace = True)
+
+n_default.drop(outliers, inplace = True)#graphing purposes
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -368,8 +369,8 @@ n_default.drop(outliers, inplace = True)
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(n_default[(n_default.LIMIT_BAL > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(n_default[(n_default.LIMIT_BAL < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.LIMIT_BAL > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.LIMIT_BAL < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
@@ -389,7 +390,12 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = default[(default.LIMIT_BAL > upper_outliers)].index
-default.drop(outliers, inplace = True)
+for i in outliers:
+    if i in train_data.index:
+        train_data.drop(i, inplace = True)
+
+default.drop(outliers, inplace = True)#graphing purposes
+
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd), label="Default Class") 
@@ -398,11 +404,11 @@ default.drop(outliers, inplace = True)
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.LIMIT_BAL > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.LIMIT_BAL < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.LIMIT_BAL > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.LIMIT_BAL < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
-# # plt.legend()
+# plt.legend()
 # fig.savefig('default_Skewed_Normal_Gaussian_Cruve_LIMIT_BAL.png', format='png')
 
 ##For EDUCATION
@@ -419,7 +425,7 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 # outliers = n_default[(n_default.EDUCATION > upper_outliers)].index
-# n_default.drop(outliers, inplace = True)
+# train_data.drop(outliers, inplace = True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -429,8 +435,8 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(n_default[(n_default.EDUCATION > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(n_default[(n_default.EDUCATION < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.EDUCATION > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.EDUCATION < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
@@ -450,7 +456,7 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 # outliers = default[(default.EDUCATION > upper_outliers)].index
-# default.drop(outliers, inplace = True)
+# train_data.drop(outliers, inplace = True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -460,8 +466,8 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.EDUCATION > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.EDUCATION < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.EDUCATION > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.EDUCATION < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
@@ -478,104 +484,234 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # plt.xticks(y_pos, objects)
 # fig.savefig('final_imbalanced_data.png', format='png')
 
-# from mpl_toolkits import mplot3d
-# ax = plt.axes(projection = '3d')
-# ax.scatter(default.AGE, default.LIMIT_BAL, default.EDUCATION, label ='Default')
-# ax.scatter(n_default.AGE, n_default.LIMIT_BAL, n_default.EDUCATION, label='Non_Default')
-# ax.set(title='AGE VS LIMIT_BAL VS EDUCATION', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
-# plt.legend()
-# #Default
-# # ax.scatter(default.AGE, default.LIMIT_BAL)
-# # ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
-# fig.savefig('scatter_outliers.png', format='png')
-# #plt.show()
+from mpl_toolkits import mplot3d
+fig = plt.figure()
+ax2 = plt.axes(projection = '3d')
+ax2.scatter(default.AGE, default.LIMIT_BAL, default.EDUCATION, label ='Default')
+ax2.scatter(n_default.AGE, n_default.LIMIT_BAL, n_default.EDUCATION, label='Non_Default')
+ax2.set(title='AGE VS LIMIT_BAL VS EDUCATION', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
+plt.legend()
+#Default
+# ax.scatter(default.AGE, default.LIMIT_BAL)
+# ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
+#fig.savefig('test.png', format='png')
+plt.show()
+
 
 ##====================STANDARDIZED
 #selecting only from train dataset
-selection = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis = 1)
-
-selection_default =selection[selection['default payment next month'] == 1]
+selection_default =train_data[train_data['default payment next month'] == 1]
 selection_default_class = selection_default.loc[:, 'default payment next month']
 selection_default.drop('default payment next month', axis = 1,inplace = True)
 
-selection_n_default =selection[selection['default payment next month'] == 0]
+selection_n_default =train_data[train_data['default payment next month'] == 0]
 selection_n_default_class = selection_n_default.loc[:, 'default payment next month']
 selection_n_default.drop('default payment next month', axis = 1,inplace = True)
 
 stand_default = StandardScaler().fit_transform(selection_default)
 stand_n_default = StandardScaler().fit_transform(selection_n_default)
 
-stand_def_objects = stand_default.tolist()
-stand_n_def_objects = stand_n_default.tolist()
+stand_def_objects = stand_default[:, 2].tolist()
+stand_n_def_objects = stand_n_default[:, 2].tolist()
+stand_limit_def_objects = stand_default[:, 0].tolist()
+stand_limit_n_def_objects = stand_n_default[:, 0].tolist()
+stand_edu_def_objects = stand_default[:, 1].tolist()
+stand_edu_n_def_object = stand_n_default[:, 1].tolist()
 
-##standardize def_objects Values
-# mean = np.mean(stand_def_objects)
-# median = np.median(stand_def_objects)
-# var = np.var(stand_def_objects)
-# sd = math.sqrt(var)
-# ub = np.max(stand_def_objects)
-# lb = np.min(stand_def_objects)
-# q1 = np.quantile(stand_def_objects, .25)
-# q3 = np.quantile(stand_def_objects, .75)
-# IQR = q3-q1
-# lower_outliers = math.floor(q1 - (1.5*IQR))
-# upper_outliers = math.floor(q3 + (1.5*IQR))
+##standardize AGE def_objects Values
+mean = np.mean(stand_def_objects)
+median = np.median(stand_def_objects)
+var = np.var(stand_def_objects)
+sd = math.sqrt(var)
+ub = np.max(stand_def_objects)
+lb = np.min(stand_def_objects)
+q1 = np.quantile(stand_def_objects, .25)
+q3 = np.quantile(stand_def_objects, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# outliers = stand_default[(stand_default[:, 2] >upper_outliers)].index
+# stand_default.drop(outliers, inplace=True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
-# ax.set(title="STANDARDIZED DATA")
+# ax.set(title="AGE STANDARDIZED DATA")
 # y = norm.pdf(x,mean,sd) 
 # xq3 = np.arange(q3, ub,1)
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default >upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 2] >upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 2] < lower_outliers)])))
 # plt.legend()
 # plt.show()
-#fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+# fig.savefig('default_Standard_Age_Normal_Gaussian_Cruve.png', format='png')
 
-##standardize n_def_objects Values
-# ax = fig.add_subplot(111)
-# mean = np.mean(stand_n_def_objects)
-# median = np.median(stand_n_def_objects)
-# var = np.var(stand_n_def_objects)
-# sd = math.sqrt(var)
-# ub = np.max(stand_n_def_objects)
-# lb = np.min(stand_n_def_objects)
-# q1 = np.quantile(stand_n_def_objects, .25)
-# q3 = np.quantile(stand_n_def_objects, .75)
-# IQR = q3-q1
-# lower_outliers = math.floor(q1 - (1.5*IQR))
-# upper_outliers = math.floor(q3 + (1.5*IQR))
+##standardize AGE n_def_objects Values
+mean = np.mean(stand_n_def_objects)
+median = np.median(stand_n_def_objects)
+var = np.var(stand_n_def_objects)
+sd = math.sqrt(var)
+ub = np.max(stand_n_def_objects)
+lb = np.min(stand_n_def_objects)
+q1 = np.quantile(stand_n_def_objects, .25)
+q3 = np.quantile(stand_n_def_objects, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+outliers = stand_n_default[(stand_n_default[:, 2] >upper_outliers)].index
+stand_n_default.drop(outliers, inplace=True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
-# ax.set(title="STANDARDIZED DATA")
+# ax.set(title="AGE STANDARDIZED DATA")
 # y = norm.pdf(x,mean,sd) 
 # xq3 = np.arange(q3, ub,1)
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 2] > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 2] < lower_outliers)])))
 # plt.legend()
-# plt.show()
+# #plt.show()
+# fig.savefig('non_default_Standard_AGe_Normal_Guassian_Distribution.png', format='png')
 
-ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
-from mpl_toolkits import mplot3d
-ax = plt.axes(projection = '3d')
-ax.scatter(stand_default[:, 0], stand_default[:, 2], stand_default[:, 1], label ='Default')
-ax.scatter(stand_n_default[:, 0], stand_n_default[:, 2], stand_n_default[:, 1],  label='Non_Default')
-ax.set(title='Standardized Data', xlabel='LIMIT_BAL', zlabel='AGE', ylabel='EDUCATION')
-plt.legend()
-#Default
-# ax.scatter(default.AGE, default.LIMIT_BAL)
-# ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
-#fig.savefig('scatter_outliers.png', format='png')
-plt.show()
+##Standard LIMIT default
+mean = np.mean(stand_limit_def_objects)
+median = np.median(stand_limit_def_objects)
+var = np.var(stand_limit_def_objects)
+sd = math.sqrt(var)
+ub = np.max(stand_limit_def_objects)
+lb = np.min(stand_limit_def_objects)
+q1 = np.quantile(stand_limit_def_objects, .25)
+q3 = np.quantile(stand_limit_def_objects, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+outliers = stand_default[(stand_default[:, 0] >upper_outliers)].index
+stand_default.drop(outliers, inplace=True)
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# ax.set(title="LIMIT STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 0] >upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 0]  < lower_outliers)])))
+# plt.legend()
+# #plt.show()
+# fig.savefig('default_Standard_Limit_Normal_Gaussian_Cruve.png', format='png')
+
+##standardize LKIMIT n_def_objects Values
+mean = np.mean(stand_limit_n_def_objects)
+median = np.median(stand_limit_n_def_objects)
+var = np.var(stand_limit_n_def_objects)
+sd = math.sqrt(var)
+ub = np.max(stand_limit_n_def_objects)
+lb = np.min(stand_limit_n_def_objects)
+q1 = np.quantile(stand_limit_n_def_objects, .25)
+q3 = np.quantile(stand_limit_n_def_objects, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+
+outliers = stand_n_default[(stand_n_default[:, 0] >upper_outliers)].index
+stand_n_default.drop(outliers, inplace=True)
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# ax.set(title="LIMIT STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 0] > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 0] < lower_outliers)])))
+# plt.legend()
+# #plt.show()
+# fig.savefig('non_default_Standard_Limit_Normal_Guassian_Distribution.png', format='png')
+
+##Standard EDUCATION default
+mean = np.mean(stand_edu_def_objects)
+median = np.median(stand_edu_def_objects)
+var = np.var(stand_edu_def_objects)
+sd = math.sqrt(var)
+ub = np.max(stand_edu_def_objects)
+lb = np.min(stand_edu_def_objects)
+q1 = np.quantile(stand_edu_def_objects, .25)
+q3 = np.quantile(stand_edu_def_objects, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# ax.set(title="LIMIT STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 1] >upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 1]  < lower_outliers)])))
+# plt.legend()
+# #plt.show()
+# fig.savefig('default_Standard_EDUCATION_Normal_Gaussian_Cruve.png', format='png')
+
+##standardize education n_def_objects Values
+mean = np.mean(stand_edu_n_def_object)
+median = np.median(stand_edu_n_def_object)
+var = np.var(stand_edu_n_def_object)
+sd = math.sqrt(var)
+ub = np.max(stand_edu_n_def_object)
+lb = np.min(stand_edu_n_def_object)
+q1 = np.quantile(stand_edu_n_def_object, .25)
+q3 = np.quantile(stand_edu_n_def_object, .75)
+IQR = q3-q1
+lower_outliers = math.floor(q1 - (1.5*IQR))
+upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# ax.set(title="LIMIT STANDARDIZED DATA")
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 1] > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 1] < lower_outliers)])))
+# plt.legend()
+# #plt.show()
+# fig.savefig('non_default_Standard_EDUCATION_Normal_Guassian_Distribution.png', format='png')
+
+
+# ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
+# from mpl_toolkits import mplot3d
+# ax = plt.axes(projection = '3d')
+# ax.scatter(stand_default[:, 2], stand_default[:, 0], stand_default[:, 1], label ='Default')
+# ax.scatter(stand_n_default[:, 2], stand_n_default[:, 0], stand_n_default[:, 1],  label='Non_Default')
+# ax.set(title='Standardized Data', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
+# plt.legend()
+# #Default
+# #ax.scatter(default.AGE, default.LIMIT_BAL)
+# #ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
+# #fig.savefig('scatter_outliers.png', format='png')
+# plt.show()
 
 
 #============END DATA SELCETION - DATA ANALYSING==================#
