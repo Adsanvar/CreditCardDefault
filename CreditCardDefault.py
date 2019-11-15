@@ -261,16 +261,17 @@ selector = math.ceil((1/6)*data.shape[0]) #percentage of data to be obtained
 end = data.shape[0] - selector #the point at which it is
 
 test_data = data.loc[end+1:, :]
-test_data_features = data.loc[end+1:, :'default payment next month']
+test_data_features = data.loc[end+1:, :'PAY_AMT6']
 test_data_class = data.loc[end+1:, 'default payment next month']
+
 
 train_data = data.loc[:end, :]
 train_data = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis = 1)
 default = train_data[train_data['default payment next month'] == 1]
 n_default = train_data[train_data['default payment next month'] == 0]
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
+fig = plt.figure()
+ax = fig.add_subplot(111)
 def_objects = default.AGE.tolist()
 n_def_objects = n_default.AGE.tolist()
 l_def_objects = default.LIMIT_BAL.tolist()
@@ -484,26 +485,28 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # plt.xticks(y_pos, objects)
 # fig.savefig('final_imbalanced_data.png', format='png')
 
-from mpl_toolkits import mplot3d
-fig = plt.figure()
-ax2 = plt.axes(projection = '3d')
-ax2.scatter(default.AGE, default.LIMIT_BAL, default.EDUCATION, label ='Default')
-ax2.scatter(n_default.AGE, n_default.LIMIT_BAL, n_default.EDUCATION, label='Non_Default')
-ax2.set(title='AGE VS LIMIT_BAL VS EDUCATION', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
-plt.legend()
-#Default
-# ax.scatter(default.AGE, default.LIMIT_BAL)
-# ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
-#fig.savefig('test.png', format='png')
-plt.show()
+# from mpl_toolkits import mplot3d
+# fig = plt.figure()
+# ax2 = plt.axes(projection = '3d')
+# ax2.scatter(default.AGE, default.LIMIT_BAL, default.EDUCATION, label ='Default')
+# ax2.scatter(n_default.AGE, n_default.LIMIT_BAL, n_default.EDUCATION, label='Non_Default')
+# ax2.set(title='AGE VS LIMIT_BAL VS EDUCATION', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
+# plt.legend()
+# #Default
+# # ax.scatter(default.AGE, default.LIMIT_BAL)
+# # ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
+# #fig.savefig('test.png', format='png')
+# plt.show()
+
+train_data_features = train_data.loc[:, :'AGE']
+train_data_class = train_data.loc[:, 'default payment next month']
 
 
 ##====================STANDARDIZED
 #selecting only from train dataset
-selection_default =train_data[train_data['default payment next month'] == 1]
+selection_default = train_data[train_data['default payment next month'] == 1]
 selection_default_class = selection_default.loc[:, 'default payment next month']
 selection_default.drop('default payment next month', axis = 1,inplace = True)
-
 selection_n_default =train_data[train_data['default payment next month'] == 0]
 selection_n_default_class = selection_n_default.loc[:, 'default payment next month']
 selection_n_default.drop('default payment next month', axis = 1,inplace = True)
@@ -562,8 +565,8 @@ IQR = q3-q1
 lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
-outliers = stand_n_default[(stand_n_default[:, 2] >upper_outliers)].index
-stand_n_default.drop(outliers, inplace=True)
+# outliers = stand_n_default[(stand_n_default[:, 2] >upper_outliers)].index
+# stand_n_default.drop(outliers, inplace=True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -577,7 +580,7 @@ stand_n_default.drop(outliers, inplace=True)
 # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 2] > upper_outliers)])))
 # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 2] < lower_outliers)])))
 # plt.legend()
-# #plt.show()
+# plt.show()
 # fig.savefig('non_default_Standard_AGe_Normal_Guassian_Distribution.png', format='png')
 
 ##Standard LIMIT default
@@ -593,8 +596,8 @@ IQR = q3-q1
 lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
-outliers = stand_default[(stand_default[:, 0] >upper_outliers)].index
-stand_default.drop(outliers, inplace=True)
+# outliers = stand_default[(stand_default[:, 0] >upper_outliers)].index
+# stand_default.drop(outliers, inplace=True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -625,8 +628,8 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 
-outliers = stand_n_default[(stand_n_default[:, 0] >upper_outliers)].index
-stand_n_default.drop(outliers, inplace=True)
+# outliers = stand_n_default[(stand_n_default[:, 0] >upper_outliers)].index
+# stand_n_default.drop(outliers, inplace=True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -700,11 +703,11 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # fig.savefig('non_default_Standard_EDUCATION_Normal_Guassian_Distribution.png', format='png')
 
 
-# ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
+#ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
 # from mpl_toolkits import mplot3d
 # ax = plt.axes(projection = '3d')
-# ax.scatter(stand_default[:, 2], stand_default[:, 0], stand_default[:, 1], label ='Default')
 # ax.scatter(stand_n_default[:, 2], stand_n_default[:, 0], stand_n_default[:, 1],  label='Non_Default')
+# ax.scatter(stand_default[:, 2], stand_default[:, 0], stand_default[:, 1], label ='Default')
 # ax.set(title='Standardized Data', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
 # plt.legend()
 # #Default
@@ -713,174 +716,7 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # #fig.savefig('scatter_outliers.png', format='png')
 # plt.show()
 
-
 #============END DATA SELCETION - DATA ANALYSING==================#
-
-
-# plt.scatter(n_default.X5, n_default.X1, color = 'g', alpha=.2, label ="non default")
-# plt.scatter(default.X5, default.X1, color ='b', alpha=.3, label="default")
-
-
-# #print(train_data_features)
-# #Normalized Data
-# norm_test = StandardScaler().fit_transform(test_data_features)
-# norm_train = StandardScaler().fit_transform(train_data_features)
-
-
-# #=======================
-# print("Non normalized Best K = 42")
-# #134 - > 79%
-# #42 -> 79%
-# #non normalized
-# knn = KNeighborsClassifier(42)
-
-# knn.fit(train_data_features, train_data_class)
-
-# predictions = knn.predict(test_data_features)
-# correct =0
-# for x in range(0, len(test_data_features_class)):
-#     if(test_data_features_class[x] == predictions[x]):
-#         correct += 1
-
-# print(knn.score(test_data_features, test_data_features_class))
-# print("Actual Precentage, {}".format((correct/len(test_data_features_class)) * 100))
-
-
-# #KFold To check the best possible parameter
-# #===============================
-# #grid = {'n_neighbors': np.arange(1,100)}
-# # grid = {'n_neighbors': np.arange(1, 200)}
-# # #knn_search = GridSearchCV(knn, grid, cv=100)
-# # knn_search = GridSearchCV(knn, grid, cv=5)
-# # X = [i for i in data[1:, 1:-1]]
-# # y = [i for i in data[1:, 24]]
-# # knn_search.fit(X ,y )
-# # print(knn_search.best_params_)
-# #print(knn_search.best_score_)
-
-# #===============================
-# # best = 0
-# # at = 0
-
-# # for i in range(1, 5000):
-# #     knn = KNeighborsClassifier(i)
-# #     knn.fit(train_data_features, train_data_class)
-# #     predictions = knn.predict(test_data_features)
-# #     score = knn.score(test_data_features, test_data_features_class)
-# #     print(i)
-# #     if score > best:
-# #         best = score
-# #         at = i
-# #         print("The Best Score is: " + str(best) + " at: " + str(at))
-
-# #=======================
-
-
-
-# #=======================
-
-# print("Normalized Data Best K = 10")
-# # 10 -> .82
-
-# knn = KNeighborsClassifier(10)
-
-# knn.fit(norm_train, train_data_class)
-
-# predictions = knn.predict(norm_test)
-
-# print(knn.score(norm_test, test_data_features_class))
-
-# #=======================
-# # best = 0
-# # at = 0
-
-# # for i in range(1, 5000):
-# #     knn = KNeighborsClassifier(i)
-# #     knn.fit(norm_train, train_data_class)
-# #     predictions = knn.predict(norm_test)
-# #     score = knn.score(norm_test, test_data_features_class)
-# #     print(i)
-# #     if score > best:
-# #         best = score
-# #         at = i
-# #         print("The Best Score is: " + str(best) + " at: " + str(at))
-
-# #=======================
-
-# #=======================
-
-
-
-
-# #=======================
-# print("Normalized with PCA Best K = 11, n_components = 3")
-# #11 -> 80%
-# #covaraince
-# c = np.cov(norm_test.T)
-# #eigen values / vectors from data
-# w, v = np.linalg.eig(c)
-# pca = PCA(n_components = 3)
-# comp_test = pca.fit_transform(norm_test)
-
-# #covaraince
-# c = np.cov(norm_train.T)
-# #eigen values / vectors from data
-# w, v = np.linalg.eig(c)
-# pca = PCA(n_components = 3)
-# comp_train = pca.fit_transform(norm_train)
-
-# # 2 = 81% at k =12
-# # 3 = 81% at k =11
-
-# knn = KNeighborsClassifier(11)
-
-# knn.fit(comp_train, train_data_class)
-
-# predictions = knn.predict(comp_test)
-
-# print(knn.score(comp_test, test_data_features_class))
-
-# #===================
-# # best = 0
-# # at = 0
-
-# # for i in range(1, 5000):
-# #     knn = KNeighborsClassifier(i)
-# #     knn.fit(comp_train, train_data_class)
-# #     predictions = knn.predict(comp_test)
-# #     score = knn.score(comp_test, test_data_features_class)
-# #     print(i)
-# #     if score > best:
-# #         best = score
-# #         at = i
-# #         print("The Best Score is: " + str(best) + " at: " + str(at))
-
-# #===================
-
-
-# #=======================
-
-
-
-# #=======================
-# # print("Percentron: ")
-
-# # clf = Perceptron()
-
-# # clf.fit(train_data_features , train_data_class)
-
-# # print("Normal: " + str(clf.score(test_data_features, test_data_features_class)))
-
-# # clf.fit(norm_train , train_data_class)
-
-# # print("Standardized: " + str(clf.score(norm_test, test_data_features_class)))
-
-# # clf.fit(comp_train , train_data_class)
-
-# # print("PCA: " + str(clf.score(comp_test, test_data_features_class)))
-
-
-# #=======================
 
 
 # #=======================
@@ -970,11 +806,14 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # # pca = PCA(n_components = 3)
 # # comp_test = pca.fit_transform(norm_data_features)
 
-
+x1 = train_data_features.to_numpy()
+y1 = np.asarray(train_data_class)
+print(type(x1))
+print(type(y1))
 # rfc = RandomForestClassifier(n_estimators=100)
-# rfc.fit(train_data_features , train_data_class)
+# rfc.fit(x1 , y1 )
 
-# print("Normal: " + str(rfc.score(test_data_features, test_data_features_class)))
+# print("Normal: " + str(rfc.score(test_data_features, test_data_class)))
 
 # rfc2 = RandomForestClassifier(n_estimators=100)
 # rfc2.fit(norm_train , train_data_class)
@@ -987,21 +826,3 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 
 # #=======================
 
-# #=======================
-
-# from sklearn.neural_network import MLPClassifier
-
-# nn = MLPClassifier()
-
-# nn.fit(train_data_features, train_data_class)
-
-# print(nn.score(test_data_features, test_data_features_class))
-# # print("Normalized")
-# # nn.fit(norm_data_features, data_class)
-
-# # print(nn.score(norm_test, test_class))
-
-
-
-
-# #=======================
