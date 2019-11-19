@@ -12,6 +12,10 @@ from sklearn.tree import export_graphviz
 import math
 import matplotlib.pyplot as plt
 from scipy.stats import norm
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score, recall_score
+from sklearn.utils import resample
+from imblearn.over_sampling import SMOTE
 
 
 data = pd.read_excel('default_of_credit_card_clients.xls', header= None)
@@ -257,21 +261,28 @@ data.drop(age, inplace =True)
 
 #============DATA SELECTION - DATA ANALYZING==================#
 
-selector = math.ceil((1/6)*data.shape[0]) #percentage of data to be obtained
-end = data.shape[0] - selector #the point at which it is
+# selector = math.ceil((1/6)*data.shape[0]) #percentage of data to be obtained
+# end = data.shape[0] - selector #the point at which it is
 
-test_data = data.loc[end+1:, :]
-test_data_features = data.loc[end+1:, :'PAY_AMT6']
-test_data_class = data.loc[end+1:, 'default payment next month']
+# test_data = data.loc[end+1:, :]
+# test_data_features = data.loc[end+1:, :'PAY_AMT6']
+# test_data_class = data.loc[end+1:, 'default payment next month']
 
 
-train_data = data.loc[:end, :]
-train_data = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis = 1)
-default = train_data[train_data['default payment next month'] == 1]
-n_default = train_data[train_data['default payment next month'] == 0]
+# train_data = data.loc[:end, :]
+# pay = pd.concat([data.PAY_0, data.PAY_2, data.PAY_3, data.PAY_4, data.PAY_5, data.PAY_6], axis =1)
+# pca = PCA(n_components = 1)
+# pca_pay = pca.fit_transform(pay)
+# pca_pay = pd.DataFrame(pca_pay)
+# print(pca_pay.shape)
+#train_data = pd.concat([data.LIMIT_BAL, data.EDUCATION, data.AGE, data['default payment next month']], axis = 1)
+train_data = data.loc[:, :]
+default = data[data['default payment next month'] == 1]
+n_default = data[data['default payment next month'] == 0]
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
 def_objects = default.AGE.tolist()
 n_def_objects = n_default.AGE.tolist()
 l_def_objects = default.LIMIT_BAL.tolist()
@@ -293,7 +304,11 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = default[(default.AGE > upper_outliers)].index
-train_data.drop(outliers, inplace = True)
+for i in outliers:
+    if i in train_data.index:
+        train_data.drop(i, inplace = True)
+
+#train_features.drop(outliers, inplace = True)
 
 
 # x = np.arange(lb,ub,1) 
@@ -323,7 +338,11 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = n_default[(n_default.AGE > upper_outliers)].index
-train_data.drop(outliers, inplace = True)
+for i in outliers:
+    if i in train_data.index:
+        train_data.drop(i, inplace = True)
+
+#train_features.drop(outliers, inplace = True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -498,223 +517,230 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # #fig.savefig('test.png', format='png')
 # plt.show()
 
-train_data_features = train_data.loc[:, :'AGE']
-train_data_class = train_data.loc[:, 'default payment next month']
+# train_data_features = train_data.loc[:, :'AGE']
+# train_data_class = train_data.loc[:, 'default payment next month']
+
+#tree1 = pd.concat([train_data.LIMIT_BAL, train_data.EDUCATION, train_data.AGE, train_data['default payment next month']], axis=1)
+
+labels = train_data['default payment next month']
+features = train_data.drop('default payment next month', axis = 1)
+
+train_features, test_features, train_labels, test_labels = train_test_split(features, labels, test_size =0.25, random_state =42)
 
 
 ##====================STANDARDIZED
-#selecting only from train dataset
-selection_default = train_data[train_data['default payment next month'] == 1]
-selection_default_class = selection_default.loc[:, 'default payment next month']
-selection_default.drop('default payment next month', axis = 1,inplace = True)
-selection_n_default =train_data[train_data['default payment next month'] == 0]
-selection_n_default_class = selection_n_default.loc[:, 'default payment next month']
-selection_n_default.drop('default payment next month', axis = 1,inplace = True)
+# #selecting only from train dataset
+# selection_default = train_features[train_features['default payment next month'] == 1]
+# selection_default_class = selection_default.loc[:, 'default payment next month']
+# selection_default.drop('default payment next month', axis = 1,inplace = True)
+# selection_n_default =train_features[train_features['default payment next month'] == 0]
+# selection_n_default_class = selection_n_default.loc[:, 'default payment next month']
+# selection_n_default.drop('default payment next month', axis = 1,inplace = True)
 
-stand_default = StandardScaler().fit_transform(selection_default)
-stand_n_default = StandardScaler().fit_transform(selection_n_default)
+# stand_default = StandardScaler().fit_transform(selection_default)
+# stand_n_default = StandardScaler().fit_transform(selection_n_default)
 
-stand_def_objects = stand_default[:, 2].tolist()
-stand_n_def_objects = stand_n_default[:, 2].tolist()
-stand_limit_def_objects = stand_default[:, 0].tolist()
-stand_limit_n_def_objects = stand_n_default[:, 0].tolist()
-stand_edu_def_objects = stand_default[:, 1].tolist()
-stand_edu_n_def_object = stand_n_default[:, 1].tolist()
+# stand_def_objects = stand_default[:, 2].tolist()
+# stand_n_def_objects = stand_n_default[:, 2].tolist()
+# stand_limit_def_objects = stand_default[:, 0].tolist()
+# stand_limit_n_def_objects = stand_n_default[:, 0].tolist()
+# stand_edu_def_objects = stand_default[:, 1].tolist()
+# stand_edu_n_def_object = stand_n_default[:, 1].tolist()
 
-##standardize AGE def_objects Values
-mean = np.mean(stand_def_objects)
-median = np.median(stand_def_objects)
-var = np.var(stand_def_objects)
-sd = math.sqrt(var)
-ub = np.max(stand_def_objects)
-lb = np.min(stand_def_objects)
-q1 = np.quantile(stand_def_objects, .25)
-q3 = np.quantile(stand_def_objects, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
+# ##standardize AGE def_objects Values
+# mean = np.mean(stand_def_objects)
+# median = np.median(stand_def_objects)
+# var = np.var(stand_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_def_objects)
+# lb = np.min(stand_def_objects)
+# q1 = np.quantile(stand_def_objects, .25)
+# q3 = np.quantile(stand_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
 
-# outliers = stand_default[(stand_default[:, 2] >upper_outliers)].index
-# stand_default.drop(outliers, inplace=True)
+# # outliers = stand_default[(stand_default[:, 2] >upper_outliers)].index
+# # stand_default.drop(outliers, inplace=True)
 
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
-# ax.set(title="AGE STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 2] >upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 2] < lower_outliers)])))
-# plt.legend()
-# plt.show()
-# fig.savefig('default_Standard_Age_Normal_Gaussian_Cruve.png', format='png')
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# # ax.set(title="AGE STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 2] >upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 2] < lower_outliers)])))
+# # plt.legend()
+# # plt.show()
+# # fig.savefig('default_Standard_Age_Normal_Gaussian_Cruve.png', format='png')
 
-##standardize AGE n_def_objects Values
-mean = np.mean(stand_n_def_objects)
-median = np.median(stand_n_def_objects)
-var = np.var(stand_n_def_objects)
-sd = math.sqrt(var)
-ub = np.max(stand_n_def_objects)
-lb = np.min(stand_n_def_objects)
-q1 = np.quantile(stand_n_def_objects, .25)
-q3 = np.quantile(stand_n_def_objects, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
+# ##standardize AGE n_def_objects Values
+# mean = np.mean(stand_n_def_objects)
+# median = np.median(stand_n_def_objects)
+# var = np.var(stand_n_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_n_def_objects)
+# lb = np.min(stand_n_def_objects)
+# q1 = np.quantile(stand_n_def_objects, .25)
+# q3 = np.quantile(stand_n_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
 
-# outliers = stand_n_default[(stand_n_default[:, 2] >upper_outliers)].index
-# stand_n_default.drop(outliers, inplace=True)
+# # outliers = stand_n_default[(stand_n_default[:, 2] >upper_outliers)].index
+# # stand_n_default.drop(outliers, inplace=True)
 
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
-# ax.set(title="AGE STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 2] > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 2] < lower_outliers)])))
-# plt.legend()
-# plt.show()
-# fig.savefig('non_default_Standard_AGe_Normal_Guassian_Distribution.png', format='png')
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# # ax.set(title="AGE STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 2] > upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 2] < lower_outliers)])))
+# # plt.legend()
+# # plt.show()
+# # fig.savefig('non_default_Standard_AGe_Normal_Guassian_Distribution.png', format='png')
 
-##Standard LIMIT default
-mean = np.mean(stand_limit_def_objects)
-median = np.median(stand_limit_def_objects)
-var = np.var(stand_limit_def_objects)
-sd = math.sqrt(var)
-ub = np.max(stand_limit_def_objects)
-lb = np.min(stand_limit_def_objects)
-q1 = np.quantile(stand_limit_def_objects, .25)
-q3 = np.quantile(stand_limit_def_objects, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
+# ##Standard LIMIT default
+# mean = np.mean(stand_limit_def_objects)
+# median = np.median(stand_limit_def_objects)
+# var = np.var(stand_limit_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_limit_def_objects)
+# lb = np.min(stand_limit_def_objects)
+# q1 = np.quantile(stand_limit_def_objects, .25)
+# q3 = np.quantile(stand_limit_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
 
-# outliers = stand_default[(stand_default[:, 0] >upper_outliers)].index
-# stand_default.drop(outliers, inplace=True)
+# # outliers = stand_default[(stand_default[:, 0] >upper_outliers)].index
+# # stand_default.drop(outliers, inplace=True)
 
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
-# ax.set(title="LIMIT STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 0] >upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 0]  < lower_outliers)])))
-# plt.legend()
-# #plt.show()
-# fig.savefig('default_Standard_Limit_Normal_Gaussian_Cruve.png', format='png')
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# # ax.set(title="LIMIT STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 0] >upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 0]  < lower_outliers)])))
+# # plt.legend()
+# # #plt.show()
+# # fig.savefig('default_Standard_Limit_Normal_Gaussian_Cruve.png', format='png')
 
-##standardize LKIMIT n_def_objects Values
-mean = np.mean(stand_limit_n_def_objects)
-median = np.median(stand_limit_n_def_objects)
-var = np.var(stand_limit_n_def_objects)
-sd = math.sqrt(var)
-ub = np.max(stand_limit_n_def_objects)
-lb = np.min(stand_limit_n_def_objects)
-q1 = np.quantile(stand_limit_n_def_objects, .25)
-q3 = np.quantile(stand_limit_n_def_objects, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
-
-
-# outliers = stand_n_default[(stand_n_default[:, 0] >upper_outliers)].index
-# stand_n_default.drop(outliers, inplace=True)
-
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
-# ax.set(title="LIMIT STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 0] > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 0] < lower_outliers)])))
-# plt.legend()
-# #plt.show()
-# fig.savefig('non_default_Standard_Limit_Normal_Guassian_Distribution.png', format='png')
-
-##Standard EDUCATION default
-mean = np.mean(stand_edu_def_objects)
-median = np.median(stand_edu_def_objects)
-var = np.var(stand_edu_def_objects)
-sd = math.sqrt(var)
-ub = np.max(stand_edu_def_objects)
-lb = np.min(stand_edu_def_objects)
-q1 = np.quantile(stand_edu_def_objects, .25)
-q3 = np.quantile(stand_edu_def_objects, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
-
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
-# ax.set(title="LIMIT STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 1] >upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 1]  < lower_outliers)])))
-# plt.legend()
-# #plt.show()
-# fig.savefig('default_Standard_EDUCATION_Normal_Gaussian_Cruve.png', format='png')
-
-##standardize education n_def_objects Values
-mean = np.mean(stand_edu_n_def_object)
-median = np.median(stand_edu_n_def_object)
-var = np.var(stand_edu_n_def_object)
-sd = math.sqrt(var)
-ub = np.max(stand_edu_n_def_object)
-lb = np.min(stand_edu_n_def_object)
-q1 = np.quantile(stand_edu_n_def_object, .25)
-q3 = np.quantile(stand_edu_n_def_object, .75)
-IQR = q3-q1
-lower_outliers = math.floor(q1 - (1.5*IQR))
-upper_outliers = math.floor(q3 + (1.5*IQR))
-
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
-# ax.set(title="LIMIT STANDARDIZED DATA")
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 1] > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 1] < lower_outliers)])))
-# plt.legend()
-# #plt.show()
-# fig.savefig('non_default_Standard_EDUCATION_Normal_Guassian_Distribution.png', format='png')
+# ##standardize LKIMIT n_def_objects Values
+# mean = np.mean(stand_limit_n_def_objects)
+# median = np.median(stand_limit_n_def_objects)
+# var = np.var(stand_limit_n_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_limit_n_def_objects)
+# lb = np.min(stand_limit_n_def_objects)
+# q1 = np.quantile(stand_limit_n_def_objects, .25)
+# q3 = np.quantile(stand_limit_n_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
 
 
-#ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
-# from mpl_toolkits import mplot3d
-# ax = plt.axes(projection = '3d')
-# ax.scatter(stand_n_default[:, 2], stand_n_default[:, 0], stand_n_default[:, 1],  label='Non_Default')
-# ax.scatter(stand_default[:, 2], stand_default[:, 0], stand_default[:, 1], label ='Default')
-# ax.set(title='Standardized Data', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
-# plt.legend()
-# #Default
-# #ax.scatter(default.AGE, default.LIMIT_BAL)
-# #ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
-# #fig.savefig('scatter_outliers.png', format='png')
-# plt.show()
+# # outliers = stand_n_default[(stand_n_default[:, 0] >upper_outliers)].index
+# # stand_n_default.drop(outliers, inplace=True)
+
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# # ax.set(title="LIMIT STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 0] > upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 0] < lower_outliers)])))
+# # plt.legend()
+# # #plt.show()
+# # fig.savefig('non_default_Standard_Limit_Normal_Guassian_Distribution.png', format='png')
+
+# ##Standard EDUCATION default
+# mean = np.mean(stand_edu_def_objects)
+# median = np.median(stand_edu_def_objects)
+# var = np.var(stand_edu_def_objects)
+# sd = math.sqrt(var)
+# ub = np.max(stand_edu_def_objects)
+# lb = np.min(stand_edu_def_objects)
+# q1 = np.quantile(stand_edu_def_objects, .25)
+# q3 = np.quantile(stand_edu_def_objects, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class")
+# # ax.set(title="LIMIT STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_default[(stand_default[:, 1] >upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_default[(stand_default[:, 1]  < lower_outliers)])))
+# # plt.legend()
+# # #plt.show()
+# # fig.savefig('default_Standard_EDUCATION_Normal_Gaussian_Cruve.png', format='png')
+
+# ##standardize education n_def_objects Values
+# mean = np.mean(stand_edu_n_def_object)
+# median = np.median(stand_edu_n_def_object)
+# var = np.var(stand_edu_n_def_object)
+# sd = math.sqrt(var)
+# ub = np.max(stand_edu_n_def_object)
+# lb = np.min(stand_edu_n_def_object)
+# q1 = np.quantile(stand_edu_n_def_object, .25)
+# q3 = np.quantile(stand_edu_n_def_object, .75)
+# IQR = q3-q1
+# lower_outliers = math.floor(q1 - (1.5*IQR))
+# upper_outliers = math.floor(q3 + (1.5*IQR))
+
+# # x = np.arange(lb,ub,1) 
+# # plt.style.use('fivethirtyeight')
+# # ax.plot(x, norm.pdf(x, mean,sd) ,label="Non Defualt Class")
+# # ax.set(title="LIMIT STANDARDIZED DATA")
+# # y = norm.pdf(x,mean,sd) 
+# # xq3 = np.arange(q3, ub,1)
+# # yq3 = norm.pdf(xq3, mean, sd)
+# # xq1 = np.arange(lb, q1,1)
+# # yq1 = norm.pdf(xq1, mean, sd)
+# # ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(stand_n_default[(stand_n_default[:, 1] > upper_outliers)])))
+# # ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(stand_n_default[(stand_n_default[:, 1] < lower_outliers)])))
+# # plt.legend()
+# # #plt.show()
+# # fig.savefig('non_default_Standard_EDUCATION_Normal_Guassian_Distribution.png', format='png')
+
+
+# #ax.scatter(stand_default[:, 0], stand_default[:, 1], stand_default[:, 2])
+# # from mpl_toolkits import mplot3d
+# # ax = plt.axes(projection = '3d')
+# # ax.scatter(stand_n_default[:, 2], stand_n_default[:, 0], stand_n_default[:, 1],  label='Non_Default')
+# # ax.scatter(stand_default[:, 2], stand_default[:, 0], stand_default[:, 1], label ='Default')
+# # ax.set(title='Standardized Data', xlabel='AGE', zlabel='EDUCATION', ylabel='LIMIT_BAL')
+# # plt.legend()
+# # #Default
+# # #ax.scatter(default.AGE, default.LIMIT_BAL)
+# # #ax.scatter(n_default.AGE, n_default.LIMIT_BAL) 
+# # #fig.savefig('scatter_outliers.png', format='png')
+# # plt.show()
 
 #============END DATA SELCETION - DATA ANALYSING==================#
 
@@ -796,8 +822,82 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # # #print(rf.predict([test_feat[0]]))
 # # print(test_class)
 
-# #________________________
 
+##_______________
+#Concat data for under/over/sythensizing
+t1_train_features = pd.concat([train_features.LIMIT_BAL, train_features.EDUCATION, train_features.AGE], axis =1)
+t1_test_features = pd.concat([test_features.LIMIT_BAL, test_features.EDUCATION, test_features.AGE], axis =1)
+
+pay = pd.concat([train_features.PAY_0, train_features.PAY_2, train_features.PAY_3,train_features.PAY_4, train_features.PAY_5, train_features.PAY_6,train_features.BILL_AMT1, train_features.BILL_AMT2, train_features.BILL_AMT3,train_features.BILL_AMT4, train_features.BILL_AMT5, train_features.BILL_AMT6,train_features.PAY_AMT1, train_features.PAY_AMT2, train_features.PAY_AMT3,train_features.PAY_AMT4, train_features.PAY_AMT5, train_features.PAY_AMT6 ], axis=1)
+test_pay =  pd.concat([test_features.PAY_0, test_features.PAY_2, test_features.PAY_3,test_features.PAY_4, test_features.PAY_5, test_features.PAY_6,test_features.BILL_AMT1, test_features.BILL_AMT2, test_features.BILL_AMT3,test_features.BILL_AMT4, test_features.BILL_AMT5, test_features.BILL_AMT6,test_features.PAY_AMT1, test_features.PAY_AMT2, test_features.PAY_AMT3,test_features.PAY_AMT4, test_features.PAY_AMT5, test_features.PAY_AMT6 ], axis=1)
+
+stand_pay = StandardScaler().fit_transform(pay)
+stand_test_pay = StandardScaler().fit_transform(test_pay)
+
+pca = PCA(n_components = 3)
+pca_pay = pca.fit_transform(stand_pay)
+test_pca_pay = pca.fit_transform(stand_test_pay)
+
+X = pd.concat([t1_train_features, train_labels], axis=1)
+default = X[X['default payment next month'] == 1]
+n_default = X[X['default payment next month'] == 0]
+
+## OVER SAMPLE THE MINORITY:
+def_over = resample(default, replace = True, n_samples=len(n_default), random_state=42)
+upsampled = pd.concat([n_default, def_over])
+upY= upsampled['default payment next month']
+# f_default = upsampled[upsampled['default payment next month'] == 1]
+# f_n_default = upsampled[upsampled['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Oversampling')
+# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('oversampled.png', format='png')
+upX = upsampled.drop('default payment next month', axis=1)
+
+##Under sample majority
+
+n_def_down = resample(n_default, replace =False, n_samples = len(default), random_state=42)
+downsampled = pd.concat([n_def_down,default])
+downY= downsampled['default payment next month']
+# f_default = downsampled[downsampled['default payment next month'] == 1]
+# f_n_default = downsampled[downsampled['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Undersampling')
+# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('undersampling.png', format='png')
+downX = downsampled.drop('default payment next month', axis=1)
+
+
+## Synthesizing
+sm = SMOTE(random_state=42, ratio =1)
+synX, synY = sm.fit_sample(t1_train_features, train_labels.tolist())
+
+# f_default = np.unique(synY, return_counts=True)[1][1]
+# f_n_default = np.unique(synY, return_counts=True)[1][0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Synthesized')
+# ax.bar(0,f_default, align ='center', alpha=.4, label ="Default: " + str(f_default) )
+# ax.bar(1, f_n_default, align='center', color ='g', alpha =.4, label = "Non-Default: " + str(f_n_default))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('Synthesized.png', format='png')
+
+# #________________________
 
 # # #covaraince
 # # c = np.cov(norm_data_features.T)
@@ -806,14 +906,239 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # # pca = PCA(n_components = 3)
 # # comp_test = pca.fit_transform(norm_data_features)
 
-x1 = train_data_features.to_numpy()
-y1 = np.asarray(train_data_class)
-print(type(x1))
-print(type(y1))
-# rfc = RandomForestClassifier(n_estimators=100)
-# rfc.fit(x1 , y1 )
 
-# print("Normal: " + str(rfc.score(test_data_features, test_data_class)))
+print('NORMAL: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit( t1_train_features , train_labels.tolist())
+predictions = rfc.predict(t1_test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(t1_test_features, test_labels.tolist())))
+
+print('Upsample default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(upX , upY.tolist())
+
+predictions = rfc.predict(t1_test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(t1_test_features, test_labels.tolist())))
+
+print('Downsample n_default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(downX , downY.tolist())
+
+predictions = rfc.predict(t1_test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(t1_test_features, test_labels.tolist())))
+
+print('Syn default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(synX , synY.tolist())
+
+predictions = rfc.predict(t1_test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(t1_test_features, test_labels.tolist())))
+
+
+#======Standadized=====#
+
+standX = StandardScaler().fit_transform(t1_train_features)
+stand_test = StandardScaler().fit_transform(t1_test_features)
+
+
+stand = pd.DataFrame(standX)
+stand.insert(3, '3', train_labels.tolist(), True)
+
+stand_default = stand[stand['3'] == 1]
+stand_n_default = stand[stand['3'] == 0]
+
+## OVER SAMPLE THE MINORITY:
+stand_def_over = resample(stand_default, replace = True, n_samples=len(stand_n_default), random_state=42)
+stand_upsampled = pd.concat([stand_n_default, stand_def_over])
+stand_upY= stand_upsampled['3']
+stand_upX = stand_upsampled.drop('3', axis=1)
+
+##Under sample majority
+
+stand_n_def_down = resample(stand_n_default, replace =False, n_samples = len(stand_default), random_state=42)
+stand_downsampled = pd.concat([stand_n_def_down,stand_default])
+stand_downY= stand_downsampled['3']
+stand_downX = stand_downsampled.drop('3', axis=1)
+
+
+## Synthesizing
+sm = SMOTE(random_state=42, ratio =1)
+stand_synX, stand_synY = sm.fit_sample(standX, train_labels.tolist())
+
+print("\n\n\nStandardized features:rfc1: ")
+
+rfc1 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc1.fit(standX , train_labels.tolist())
+
+predictions = rfc1.predict(stand_test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc1.score(stand_test, test_labels.tolist())))
+
+print('Upsample default:rfc1: ')
+rfc2 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc2.fit(stand_upX , stand_upY.tolist())
+
+predictions = rfc2.predict(stand_test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc2.score(stand_test, test_labels.tolist())))
+
+print('Downsample n_default:rfc3: ')
+rfc3 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc3.fit(stand_downX , stand_downY.tolist())
+
+predictions = rfc3.predict(stand_test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc3.score(stand_test, test_labels.tolist())))
+
+print('Syn default:rfc4: ')
+rfc4 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc4.fit(stand_synX , stand_synY.tolist())
+
+predictions = rfc4.predict(stand_test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc4.score(stand_test, test_labels.tolist())))
+
+
+
+#======Standadized Pay=====#
+df_pay = pd.DataFrame(pca_pay)
+df_pay.insert(3, '3', train_labels.tolist(), True)
+
+stand_default = df_pay[df_pay['3'] == 1]
+stand_n_default = df_pay[df_pay['3'] == 0]
+
+## OVER SAMPLE THE MINORITY:
+stand_def_over = resample(stand_default, replace = True, n_samples=len(stand_n_default), random_state=42)
+stand_upsampled = pd.concat([stand_n_default, stand_def_over])
+stand_upY= stand_upsampled['3']
+stand_upX = stand_upsampled.drop('3', axis=1)
+
+##Under sample majority
+
+stand_n_def_down = resample(stand_n_default, replace =False, n_samples = len(stand_default), random_state=42)
+stand_downsampled = pd.concat([stand_n_def_down,stand_default])
+stand_downY= stand_downsampled['3']
+stand_downX = stand_downsampled.drop('3', axis=1)
+
+
+## Synthesizing
+sm = SMOTE(random_state=42, ratio =1)
+stand_synX, stand_synY = sm.fit_sample(pca_pay, train_labels.tolist())
+
+print("\n\n\nStandardized features:rfc5: ")
+
+rfc5 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc5.fit(pca_pay , train_labels.tolist())
+
+predictions = rfc5.predict(test_pca_pay)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc5.score(test_pca_pay, test_labels.tolist())))
+
+print('Upsample default:rfc6: ')
+rfc6 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc6.fit(stand_upX , stand_upY.tolist())
+
+predictions = rfc6.predict(test_pca_pay)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc6.score(test_pca_pay, test_labels.tolist())))
+
+print('Downsample n_default:rfc7: ')
+rfc7 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc7.fit(stand_downX , stand_downY.tolist())
+
+predictions = rfc7.predict(test_pca_pay)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc7.score(test_pca_pay, test_labels.tolist())))
+
+print('Syn default: rfc8:  ')
+rfc8 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc8.fit(stand_synX , stand_synY.tolist())
+
+predictions = rfc8.predict(test_pca_pay)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc8.score(test_pca_pay, test_labels.tolist())))
+
+#combine
+train = np.concatenate((standX, pca_pay), axis=1)
+test = np.concatenate((stand_test, test_pca_pay), axis=1)
+
+df = pd.DataFrame(train)
+df.insert(6, '6', train_labels.tolist(), True)
+stand_default = df[df['6'] == 1]
+stand_n_default = df[df['6'] == 0]
+
+## OVER SAMPLE THE MINORITY:
+stand_def_over = resample(stand_default, replace = True, n_samples=len(stand_n_default), random_state=42)
+stand_upsampled = pd.concat([stand_n_default, stand_def_over])
+stand_upY= stand_upsampled['6']
+stand_upX = stand_upsampled.drop('6', axis=1)
+
+##Under sample majority
+
+stand_n_def_down = resample(stand_n_default, replace =False, n_samples = len(stand_default), random_state=42)
+stand_downsampled = pd.concat([stand_n_def_down,stand_default])
+stand_downY= stand_downsampled['6']
+stand_downX = stand_downsampled.drop('6', axis=1)
+
+## Synthesizing
+sm = SMOTE(random_state=42, ratio =1)
+stand_synX, stand_synY = sm.fit_sample(train, train_labels.tolist())
+
+print("\n\n\nStandardized features:rfc9: ")
+
+rfc9 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc9.fit(train , train_labels.tolist())
+
+predictions = rfc9.predict(test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc9.score(test, test_labels.tolist())))
+
+print('Upsample default:rfc10: ')
+rfc10 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc10.fit(stand_upX , stand_upY.tolist())
+
+predictions = rfc10.predict(test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc10.score(test, test_labels.tolist())))
+
+print('Downsample n_default:rfc11: ')
+rfc11 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc11.fit(stand_downX , stand_downY.tolist())
+
+predictions = rfc11.predict(test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc11.score(test, test_labels.tolist())))
+
+print('Syn default:rfc12: ')
+rfc12 = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc12.fit(stand_synX , stand_synY.tolist())
+
+predictions = rfc12.predict(test)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc12.score(test, test_labels.tolist())))
+
+
+#print("Normal: " + str(rfc.score(test_features, test_labels.tolist())))
 
 # rfc2 = RandomForestClassifier(n_estimators=100)
 # rfc2.fit(norm_train , train_data_class)
