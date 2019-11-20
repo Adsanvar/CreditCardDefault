@@ -170,6 +170,12 @@ data.drop(age, inplace =True)
 #plt.xticks(y_pos, objects)
 #fig.savefig('skewed_right_filtered_Data.png', format='png')
 #plt.show()
+# f_default = data[data['default payment next month'] == 1] #ON filtered
+# f_n_default = data[data['default payment next month'] == 0]
+# plt.scatter(f_default.AGE, f_default.LIMIT_BAL, label="default", alpha=.3)
+# plt.scatter(f_n_default.AGE, f_n_default.LIMIT_BAL, label="non-default", alpha=.3)
+# plt.title("AGE VS LIMIT_BAL")
+# plt.show()
 
 ##### MODIFIED BELOW
 # # ##Normal Curve - pre dropping outliers
@@ -276,13 +282,14 @@ data.drop(age, inplace =True)
 # pca_pay = pd.DataFrame(pca_pay)
 # print(pca_pay.shape)
 #train_data = pd.concat([data.LIMIT_BAL, data.EDUCATION, data.AGE, data['default payment next month']], axis = 1)
+
 train_data = data.loc[:, :]
 default = data[data['default payment next month'] == 1]
 n_default = data[data['default payment next month'] == 0]
 
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
+fig = plt.figure()
+ax = fig.add_subplot(111)
 def_objects = default.AGE.tolist()
 n_def_objects = n_default.AGE.tolist()
 l_def_objects = default.LIMIT_BAL.tolist()
@@ -308,21 +315,21 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-#train_features.drop(outliers, inplace = True)
 
 
-# x = np.arange(lb,ub,1) 
-# plt.style.use('fivethirtyeight')
-# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class") 
-# y = norm.pdf(x,mean,sd) 
-# xq3 = np.arange(q3, ub,1)
-# yq3 = norm.pdf(xq3, mean, sd)
-# xq1 = np.arange(lb, q1,1)
-# yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.AGE >upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.AGE) < lower_outliers])))
-# plt.legend()
-# fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+x = np.arange(lb,ub,1) 
+plt.style.use('fivethirtyeight')
+ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class") 
+y = norm.pdf(x,mean,sd) 
+xq3 = np.arange(q3, ub,1)
+yq3 = norm.pdf(xq3, mean, sd)
+xq1 = np.arange(lb, q1,1)
+yq1 = norm.pdf(xq1, mean, sd)
+ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.AGE >upper_outliers)])))
+ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.AGE) < lower_outliers])))
+plt.legend()
+fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+default.drop(outliers, inplace = True)
 
 ##n_def_objects Values
 mean = np.mean(n_def_objects)
@@ -342,7 +349,6 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-#train_features.drop(outliers, inplace = True)
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -352,12 +358,13 @@ for i in outliers:
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(n_default[(n_default.AGE >60)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(n_default[(n_default.AGE > upper_outliers)])))
 # ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(n_default[(n_default.AGE) < lower_outliers])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
 # fig.savefig('non_default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+n_default.drop(outliers, inplace = True)
 #plt.show()
 
 
@@ -379,7 +386,7 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-n_default.drop(outliers, inplace = True)#graphing purposes
+#n_default.drop(outliers, inplace = True)#graphing purposes
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -414,8 +421,13 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-default.drop(outliers, inplace = True)#graphing purposes
-
+#default.drop(outliers, inplace = True)#graphing purposes
+print("segmented")
+print(len(default))
+print(len(n_default))
+print("non-segemented")
+print(len(train_data[train_data['default payment next month'] == 1]))
+print(len(train_data[train_data['default payment next month'] == 0]))
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd), label="Default Class") 
@@ -498,8 +510,8 @@ upper_outliers = math.floor(q3 + (1.5*IQR))
 # y_pos = [0, 1]
 
 # ax.set(title='Filtered Imbalanced')
-# ax.bar(0, len(default), align ='center', alpha=.4, label ="Default: " + str(len(default)) )
-# ax.bar(1, len(n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(n_default)))
+# ax.bar(0, len(train_data[train_data['default payment next month'] == 1]), align ='center', alpha=.4, label ="Default: " + str(len(train_data[train_data['default payment next month'] == 1])) )
+# ax.bar(1, len(train_data[train_data['default payment next month'] == 0]), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(train_data[train_data['default payment next month'] == 0])))
 # fig.legend()
 # plt.xticks(y_pos, objects)
 # fig.savefig('final_imbalanced_data.png', format='png')
@@ -1138,6 +1150,109 @@ print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
 print("Score: " + str(rfc12.score(test, test_labels.tolist())))
 
 
+#BASE
+
+X = pd.concat([train_features, train_labels], axis=1)
+default = X[X['default payment next month'] == 1]
+n_default = X[X['default payment next month'] == 0]
+
+## OVER SAMPLE THE MINORITY:
+def_over = resample(default, replace = True, n_samples=len(n_default), random_state=42)
+upsampled = pd.concat([n_default, def_over])
+upY= upsampled['default payment next month']
+# f_default = upsampled[upsampled['default payment next month'] == 1]
+# f_n_default = upsampled[upsampled['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Oversampling')
+# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('oversampled.png', format='png')
+upX = upsampled.drop('default payment next month', axis=1)
+
+##Under sample majority
+
+n_def_down = resample(n_default, replace =False, n_samples = len(default), random_state=42)
+downsampled = pd.concat([n_def_down,default])
+downY= downsampled['default payment next month']
+# f_default = downsampled[downsampled['default payment next month'] == 1]
+# f_n_default = downsampled[downsampled['default payment next month'] == 0]
+# objects = ('default', 'non_default')
+# y_pos = [0, 1]
+# fig = plt.figure()
+# ax = fig.add_subplot()
+# ax.set(title='Undersampling')
+# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# fig.legend()
+# plt.xticks(y_pos, objects)
+# fig.savefig('undersampling.png', format='png')
+downX = downsampled.drop('default payment next month', axis=1)
+
+
+## Synthesizing
+sm = SMOTE(random_state=42, ratio =1)
+synX, synY = sm.fit_sample(train_features, train_labels.tolist())
+
+print("BASE")
+print('NORMAL: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit( train_features , train_labels.tolist())
+predictions = rfc.predict(test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(test_features, test_labels.tolist())))
+
+print('Upsample default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(upX , upY.tolist())
+
+predictions = rfc.predict(test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(test_features, test_labels.tolist())))
+
+print('Downsample n_default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(downX , downY.tolist())
+
+predictions = rfc.predict(test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(test_features, test_labels.tolist())))
+
+print('Syn default: ')
+rfc = RandomForestClassifier(n_estimators=100, random_state=42)
+rfc.fit(synX , synY.tolist())
+
+predictions = rfc.predict(test_features)
+print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
+print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
+print("Score: " + str(rfc.score(test_features, test_labels.tolist())))
+
+print("KNN")
+knn = KNeighborsClassifier(10)
+
+print("UPSample")
+knn.fit(upX, upY.tolist())
+
+print(knn.score(test_features, test_labels.tolist()))
+
+print("Down Sample")
+knn = KNeighborsClassifier(10)
+knn.fit(downX , downY.tolist())
+
+print(knn.score(test_features, test_labels.tolist()))
+
+print("Syn Sample")
+knn = KNeighborsClassifier(10)
+knn.fit(synX , synY.tolist())
+
+print(knn.score(test_features, test_labels.tolist()))
 #print("Normal: " + str(rfc.score(test_features, test_labels.tolist())))
 
 # rfc2 = RandomForestClassifier(n_estimators=100)
