@@ -287,9 +287,15 @@ train_data = data.loc[:, :]
 default = data[data['default payment next month'] == 1]
 n_default = data[data['default payment next month'] == 0]
 
+print("segmented")
+print(len(default))
+print(len(n_default))
+print("non-segemented")
+print(len(train_data[train_data['default payment next month'] == 1]))
+print(len(train_data[train_data['default payment next month'] == 0]))
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
 def_objects = default.AGE.tolist()
 n_def_objects = n_default.AGE.tolist()
 l_def_objects = default.LIMIT_BAL.tolist()
@@ -311,25 +317,32 @@ lower_outliers = math.floor(q1 - (1.5*IQR))
 upper_outliers = math.floor(q3 + (1.5*IQR))
 
 outliers = default[(default.AGE > upper_outliers)].index
+
 for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
 
+print("non-segemented")
+print(len(train_data[train_data['default payment next month'] == 1]))
+print(len(train_data[train_data['default payment next month'] == 0]))
 
-x = np.arange(lb,ub,1) 
-plt.style.use('fivethirtyeight')
-ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class") 
-y = norm.pdf(x,mean,sd) 
-xq3 = np.arange(q3, ub,1)
-yq3 = norm.pdf(xq3, mean, sd)
-xq1 = np.arange(lb, q1,1)
-yq1 = norm.pdf(xq1, mean, sd)
-ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.AGE >upper_outliers)])))
-ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.AGE) < lower_outliers])))
-plt.legend()
-fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
+# x = np.arange(lb,ub,1) 
+# plt.style.use('fivethirtyeight')
+# ax.plot(x, norm.pdf(x, mean,sd) ,label="Default Class") 
+# y = norm.pdf(x,mean,sd) 
+# xq3 = np.arange(q3, ub,1)
+# yq3 = norm.pdf(xq3, mean, sd)
+# xq1 = np.arange(lb, q1,1)
+# yq1 = norm.pdf(xq1, mean, sd)
+# ax.fill_between(xq3,yq3,0, alpha=.3, color='r', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.AGE >upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.3, color='g', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.AGE) < lower_outliers])))
+# plt.legend()
+# fig.savefig('default_Skewed_Normal_Gaussian_Cruve.png', format='png')
 default.drop(outliers, inplace = True)
+print("segmented")
+print(len(default))
+print(len(n_default))
 
 ##n_def_objects Values
 mean = np.mean(n_def_objects)
@@ -350,6 +363,10 @@ for i in outliers:
         train_data.drop(i, inplace = True)
 
 
+print("non-segemented")
+print(len(train_data[train_data['default payment next month'] == 1]))
+print(len(train_data[train_data['default payment next month'] == 0]))
+
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd), color = 'orange', label="Non-Default Class") 
@@ -366,7 +383,9 @@ for i in outliers:
 # fig.savefig('non_default_Skewed_Normal_Gaussian_Cruve.png', format='png')
 n_default.drop(outliers, inplace = True)
 #plt.show()
-
+print("segmented")
+print(len(default))
+print(len(n_default))
 
 ###For Limit_Balance - NON_DEFAULT
 mean = np.mean(l_n_def_objects)
@@ -386,7 +405,10 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-#n_default.drop(outliers, inplace = True)#graphing purposes
+
+print("non-segemented")
+print(len(train_data[train_data['default payment next month'] == 1]))
+print(len(train_data[train_data['default payment next month'] == 0]))
 
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
@@ -396,12 +418,16 @@ for i in outliers:
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.LIMIT_BAL > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.LIMIT_BAL < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(n_default[(n_default.LIMIT_BAL > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(n_default[(n_default.LIMIT_BAL < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
 # fig.savefig('non_default_Skewed_Normal_Gaussian_Cruve_LIMIT_BAL.png', format='png')
+n_default.drop(outliers, inplace = True)#graphing purposes
+print("segmented")
+print(len(default))
+print(len(n_default))
 
 ##LIMIT_BAL DEFAULT
 mean = np.mean(l_def_objects)
@@ -421,13 +447,11 @@ for i in outliers:
     if i in train_data.index:
         train_data.drop(i, inplace = True)
 
-#default.drop(outliers, inplace = True)#graphing purposes
-print("segmented")
-print(len(default))
-print(len(n_default))
+
 print("non-segemented")
 print(len(train_data[train_data['default payment next month'] == 1]))
 print(len(train_data[train_data['default payment next month'] == 0]))
+
 # x = np.arange(lb,ub,1) 
 # plt.style.use('fivethirtyeight')
 # ax.plot(x, norm.pdf(x, mean,sd), label="Default Class") 
@@ -436,12 +460,16 @@ print(len(train_data[train_data['default payment next month'] == 0]))
 # yq3 = norm.pdf(xq3, mean, sd)
 # xq1 = np.arange(lb, q1,1)
 # yq1 = norm.pdf(xq1, mean, sd)
-# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(train_data[(train_data.LIMIT_BAL > upper_outliers)])))
-# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(train_data[(train_data.LIMIT_BAL < lower_outliers)])))
+# ax.fill_between(xq3,yq3,0, alpha=.4, color='y', label="Q3: " +str(q3) +"\nOutliers > " +str(upper_outliers)+" :: QTY: " +str(len(default[(default.LIMIT_BAL > upper_outliers)])))
+# ax.fill_between(xq1,yq1,0, alpha=.4, color='b', label="Q1: " +str(q1) +"\nOutliers < " +str(lower_outliers)+" :: QTY: " + str(len(default[(default.LIMIT_BAL < lower_outliers)])))
 
 # ax.set_title('Normal Gaussian Curve')
 # plt.legend()
 # fig.savefig('default_Skewed_Normal_Gaussian_Cruve_LIMIT_BAL.png', format='png')
+default.drop(outliers, inplace = True)#graphing purposes
+print("segmented")
+print(len(default))
+print(len(n_default))
 
 ##For EDUCATION
 mean = np.mean(e_n_def_objects)
@@ -863,10 +891,10 @@ upY= upsampled['default payment next month']
 # objects = ('default', 'non_default')
 # y_pos = [0, 1]
 # fig = plt.figure()
-# ax = fig.add_subplot()
-# ax.set(title='Oversampling')
-# ax.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
-# ax.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
+# #ax = fig.add_subplot()
+# plt.title('Oversampling')
+# plt.bar(0, len(f_default), align ='center', alpha=.4, label ="Default: " + str(len(f_default)) )
+# plt.bar(1, len(f_n_default), align='center', color ='g', alpha =.4, label = "Non-Default: " + str(len(f_n_default)))
 # fig.legend()
 # plt.xticks(y_pos, objects)
 # fig.savefig('oversampled.png', format='png')
@@ -1234,25 +1262,25 @@ print("F1: " + str(f1_score(test_labels.tolist(), predictions)))
 print("Recall: " + str(recall_score(test_labels.tolist(), predictions)))
 print("Score: " + str(rfc.score(test_features, test_labels.tolist())))
 
-print("KNN")
-knn = KNeighborsClassifier(10)
+# print("KNN")
+# knn = KNeighborsClassifier(10)
 
-print("UPSample")
-knn.fit(upX, upY.tolist())
+# print("UPSample")
+# knn.fit(upX, upY.tolist())
 
-print(knn.score(test_features, test_labels.tolist()))
+# print(knn.score(test_features, test_labels.tolist()))
 
-print("Down Sample")
-knn = KNeighborsClassifier(10)
-knn.fit(downX , downY.tolist())
+# print("Down Sample")
+# knn = KNeighborsClassifier(10)
+# knn.fit(downX , downY.tolist())
 
-print(knn.score(test_features, test_labels.tolist()))
+# print(knn.score(test_features, test_labels.tolist()))
 
-print("Syn Sample")
-knn = KNeighborsClassifier(10)
-knn.fit(synX , synY.tolist())
+# print("Syn Sample")
+# knn = KNeighborsClassifier(10)
+# knn.fit(synX , synY.tolist())
 
-print(knn.score(test_features, test_labels.tolist()))
+# print(knn.score(test_features, test_labels.tolist()))
 #print("Normal: " + str(rfc.score(test_features, test_labels.tolist())))
 
 # rfc2 = RandomForestClassifier(n_estimators=100)
